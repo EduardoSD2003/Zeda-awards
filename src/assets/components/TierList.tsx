@@ -1,11 +1,10 @@
-import { PackagePlus } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ImageDown, PackagePlus } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CategoriaProps, Id, MovieProps } from "../../types";
 import TierListContainer from "./TierListContainer";
 import Filmes from "./Filmes";
 import { newtonsCradle } from "ldrs";
-import * as htmlToImage from "html-to-image";
-import { toPng, toJpeg, toBlob, toPixelData, toSvg } from "html-to-image";
+import { toPng} from "html-to-image";
 
 newtonsCradle.register();
 
@@ -59,7 +58,7 @@ function TierList() {
     toPng(ref.current, { cacheBust: true,})
     .then((dataUrl) => {
       const link = document.createElement("a");
-      link.download = "my-image-name.png";
+      link.download = "zeda-tier-list.png";
       link.href = dataUrl;
       link.click();
     })
@@ -108,7 +107,7 @@ function TierList() {
           />
         </div>
 
-        <button onClick={onButtonClick}>Salvar</button>
+        <ImageDown className="cursor-pointer m-5 size-7 text-slate-100 hover:text-green-500" onClick={onButtonClick}>Salvar</ImageDown>
 
         <div ref={ref}>
           {categorias.map((cat) => (

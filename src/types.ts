@@ -10,7 +10,4 @@ export interface MovieProps {
     poster_path: string;
     id: number;
     categoriaId: Id
-  }
-  
-
-  
+}
