@@ -1,11 +1,15 @@
 import { PackagePlus } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CategoriaProps, Id, MovieProps } from "../../types";
 import TierListContainer from "./TierListContainer";
 import Filmes from "./Filmes";
 import { newtonsCradle } from "ldrs";
+import * as htmlToImage from "html-to-image";
+import { toPng, toJpeg, toBlob, toPixelData, toSvg } from "html-to-image";
 
 newtonsCradle.register();
+
+
 
 function TierList() {
   const [categorias, setCategorias] = useState<CategoriaProps[]>([]);
@@ -15,6 +19,7 @@ function TierList() {
   const [searchText, setSearchText] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
+
 
   const getMovie = async () => {
     const response = await fetch(
@@ -44,10 +49,31 @@ function TierList() {
     }
   }, [searchText]);
 
+  const ref = useRef<HTMLDivElement>(null);
+
+  const onButtonClick = useCallback(() => {
+    if (ref.current === null) {
+      return;
+    }
+  
+    toPng(ref.current, { cacheBust: true,})
+    .then((dataUrl) => {
+      const link = document.createElement("a");
+      link.download = "my-image-name.png";
+      link.href = dataUrl;
+      link.click();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }, [ref]);
+
   return (
     <div className="">
       <div className="p-10 w-full h-auto bg-slate-400 items-center justify-center flex flex-col space-y-2">
-        <h1 className="mb-5 background-animate bg-gradient-to-r from-blue-200 via-blue-500 to-blue-600 bg-clip-text flex justify-center items-center content-center w-full text-transparent text-5xl select-none">Zeda awards</h1>
+        <h1 className="mb-5 background-animate bg-gradient-to-r from-blue-200 via-blue-500 to-blue-600 bg-clip-text flex justify-center items-center content-center w-full text-transparent text-5xl select-none">
+          Zeda awards
+        </h1>
         <input
           type="text"
           value={searchText}
@@ -82,15 +108,19 @@ function TierList() {
           />
         </div>
 
-        {categorias.map((cat) => (
-          <TierListContainer
-            key={cat.id}
-            categoria={cat}
-            deletarCategoria={deletarCategoria}
-            updadeCategoria={updadeCategoria}
-            movies={listaFilmes}
-          />
-        ))}
+        <button onClick={onButtonClick}>Salvar</button>
+
+        <div ref={ref}>
+          {categorias.map((cat) => (
+            <TierListContainer
+              key={cat.id}
+              categoria={cat}
+              deletarCategoria={deletarCategoria}
+              updadeCategoria={updadeCategoria}
+              movies={listaFilmes}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

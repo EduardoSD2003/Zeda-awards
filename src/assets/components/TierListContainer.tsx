@@ -1,4 +1,4 @@
-import { PaintBucket, Paintbrush2, Palette, Trash2 } from "lucide-react";
+import { Paintbrush2, Trash2 } from "lucide-react";
 import { CategoriaProps, Id, MovieProps } from "../../types";
 import React, { useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
@@ -42,11 +42,11 @@ function TierListContainer(props: Props) {
     setIndexInicial(index);
   };
 
-  const handleOnDragOverList = (e: React.DragEvent, index: number) => {
+  const handleOnDragOverList = (index: number) => {
     setIndexFinal(index);
   };
 
-  const handleOnDragEndList = (e: React.DragEvent, index: number) => {
+  const handleOnDragEndList = () => {
     const items = reorder(filmesAdd, indexInicial, indexFinal);
     setFilmesAdd(items);
   };
@@ -92,6 +92,7 @@ function TierListContainer(props: Props) {
               value={categoria.title}
               onChange={(e) => updadeCategoria(categoria.id, e.target.value)}
               autoFocus
+              spellCheck={false}
               placeholder="Adicione uma categoria"
               className="bg-transparent w-full h-full flex flex-wrap items-center justify-between text-center border-none placeholder:text-sm resize-none text-decoration:none font-bold"
               style={{ overflow: "auto", scrollbarWidth: "none" }}
@@ -112,8 +113,8 @@ function TierListContainer(props: Props) {
                 draggable
                 onDoubleClick={() => deleteFilm(filme.id)}
                 onDragStart={(e) => handleOnDragStart(e, filme.id, index)}
-                onDragOver={(e) => handleOnDragOverList(e, index)}
-                onDragEnd={(e) => handleOnDragEndList(e, index)}
+                onDragOver={() => handleOnDragOverList(index)}
+                onDragEnd={() => handleOnDragEndList()}
                 alt={filme.title}
               />
             </div>

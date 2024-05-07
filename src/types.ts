@@ -12,3 +12,5 @@ export interface MovieProps {
     categoriaId: Id
   }
   
+
+  
