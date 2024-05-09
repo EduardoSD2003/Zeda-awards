@@ -9,6 +9,7 @@ import { toPng } from "html-to-image";
 newtonsCradle.register();
 
 function TierList() {
+
   useEffect(() => {
     const storedData = localStorage.getItem("categoria");
     if (storedData !== null) {
@@ -20,15 +21,21 @@ function TierList() {
     const storedData = localStorage.getItem("categoria");
     return storedData !== null ? JSON.parse(storedData) : [];
   });
-
   useEffect(() => {
     localStorage.setItem("categoria", JSON.stringify(categorias));
   }, [categorias]);
 
-  const [listaFilmes, setListaFilmes] = useState<MovieProps[]>([]);
-
   const [searchText, setSearchText] = useState("");
+  useEffect(() => {
+    if (searchText) {
+      const timeoutId = setTimeout(() => {
+        getMovie();
+      }, 5000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchText]);
 
+  const [listaFilmes, setListaFilmes] = useState<MovieProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const getMovie = async () => {
@@ -50,22 +57,11 @@ function TierList() {
     }
   };
 
-  useEffect(() => {
-    if (searchText) {
-      const timeoutId = setTimeout(() => {
-        getMovie();
-      }, 5000);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [searchText]);
-
   const ref = useRef<HTMLDivElement>(null);
-
   const onButtonClick = useCallback(() => {
     if (ref.current === null) {
       return;
     }
-
     toPng(ref.current, { cacheBust: true })
       .then((dataUrl) => {
         const link = document.createElement("a");

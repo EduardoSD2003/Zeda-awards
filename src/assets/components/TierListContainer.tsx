@@ -12,12 +12,32 @@ interface Props {
 
 function TierListContainer(props: Props) {
   const { categoria, deletarCategoria, updadeCategoria, movies } = props;
+  const [indexFinal, setIndexFinal] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(categoria.color || "");
   const [indexInicial, setIndexInicial] = useState(0);
+
   const [filmesAdd, setFilmesAdd] = useState<MovieProps[]>(
     categoria.movies || []
   );
-  const [indexFinal, setIndexFinal] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(categoria.color || "");
+
+  
+
+  const handleOnDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleOnDragOverList = (index: number) => {
+    setIndexFinal(index);
+  };
+
+  const handleOnDragStart = (
+    e: React.DragEvent,
+    filmeId: number,
+    index: number
+  ) => {
+    e.dataTransfer.setData("filmeId", filmeId.toString());
+    setIndexInicial(index);
+  };
 
   const handleColorChange = (event: any) => {
     const color = event.target.value;
@@ -25,7 +45,7 @@ function TierListContainer(props: Props) {
     const storedCategorias = JSON.parse(
       localStorage.getItem("categoria") || "[]"
     );
-    const updatedCategorias = storedCategorias.map((cat: any) =>
+    const updatedCategorias = storedCategorias.map((cat: CategoriaProps) =>
       cat.id === categoria.id ? { ...cat, color } : cat
     );
     localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
@@ -49,21 +69,12 @@ function TierListContainer(props: Props) {
     }
   };
 
-  const handleOnDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleOnDragStart = (
-    e: React.DragEvent,
-    filmeId: number,
-    index: number
-  ) => {
-    e.dataTransfer.setData("filmeId", filmeId.toString());
-    setIndexInicial(index);
-  };
-
-  const handleOnDragOverList = (index: number) => {
-    setIndexFinal(index);
+  const updateCategoriaInLocalStorage = (updatedCategoria: CategoriaProps) => {
+    const storedCategorias = JSON.parse(localStorage.getItem("categoria") || "[]");
+    const updatedCategorias = storedCategorias.map((cat: CategoriaProps) =>
+      cat.id === categoria.id ? updatedCategoria : cat
+    );
+    localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
   };
 
   const handleOnDragEndList = () => {
@@ -76,13 +87,6 @@ function TierListContainer(props: Props) {
     updateCategoriaInLocalStorage(updatedCategoria);
   };
 
-  const updateCategoriaInLocalStorage = (updatedCategoria: CategoriaProps) => {
-    const storedCategorias = JSON.parse(localStorage.getItem("categoria") || "[]");
-    const updatedCategorias = storedCategorias.map((cat: CategoriaProps) =>
-      cat.id === categoria.id ? updatedCategoria : cat
-    );
-    localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
-  };
 
   const deleteFilm = (id: number) => {
     setFilmesAdd((prevFilmesAdd) =>
@@ -106,7 +110,6 @@ function TierListContainer(props: Props) {
     return result;
   };
 
-  useEffect(() => console.log("filmes add: ", filmesAdd), [filmesAdd]);
 
   return (
     <div className="w-full h-auto p-3 overflow-y-auto space-y-5 rounded-3xl animate-jump-in animate-delay-200 animate-once ">
