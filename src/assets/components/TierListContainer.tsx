@@ -1,6 +1,6 @@
 import { Paintbrush2, Trash2 } from "lucide-react";
 import { CategoriaProps, Id, MovieProps } from "../../types";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 
 interface Props {
@@ -12,13 +12,23 @@ interface Props {
 
 function TierListContainer(props: Props) {
   const { categoria, deletarCategoria, updadeCategoria, movies } = props;
-  const [filmesAdd, setFilmesAdd] = useState<MovieProps[]>([]);
   const [indexInicial, setIndexInicial] = useState(0);
+  const [filmesAdd, setFilmesAdd] = useState<MovieProps[]>(
+    categoria.movies || []
+  );
   const [indexFinal, setIndexFinal] = useState(0);
-  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedColor, setSelectedColor] = useState(categoria.color || "");
 
   const handleColorChange = (event: any) => {
-    setSelectedColor(event.target.value);
+    const color = event.target.value;
+    setSelectedColor(color);
+    const storedCategorias = JSON.parse(
+      localStorage.getItem("categoria") || "[]"
+    );
+    const updatedCategorias = storedCategorias.map((cat: any) =>
+      cat.id === categoria.id ? { ...cat, color } : cat
+    );
+    localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
   };
 
   const handleOnDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -26,6 +36,16 @@ function TierListContainer(props: Props) {
     const filmeToAdd = movies.find((filme: any) => filme.id === filmeId);
     if (filmeToAdd && !filmesAdd.some((filme) => filme.id === filmeId)) {
       setFilmesAdd((prevFilmesAdd) => [...prevFilmesAdd, filmeToAdd]);
+
+      const storedCategorias = JSON.parse(
+        localStorage.getItem("categoria") || "[]"
+      );
+      const updatedCategorias = storedCategorias.map((cat: CategoriaProps) =>
+        cat.id === categoria.id
+          ? { ...cat, movies: [...(cat.movies || []), filmeToAdd] }
+          : cat
+      );
+      localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
     }
   };
 
@@ -47,35 +67,55 @@ function TierListContainer(props: Props) {
   };
 
   const handleOnDragEndList = () => {
-    const items = reorder(filmesAdd, indexInicial, indexFinal);
-    setFilmesAdd(items);
+    const updatedFilmesAdd = reorder(filmesAdd, indexInicial, indexFinal);
+    setFilmesAdd(updatedFilmesAdd);
+    const updatedCategoria = {
+      ...categoria,
+      movies: updatedFilmesAdd,
+    };
+    updateCategoriaInLocalStorage(updatedCategoria);
+  };
+
+  const updateCategoriaInLocalStorage = (updatedCategoria: CategoriaProps) => {
+    const storedCategorias = JSON.parse(localStorage.getItem("categoria") || "[]");
+    const updatedCategorias = storedCategorias.map((cat: CategoriaProps) =>
+      cat.id === categoria.id ? updatedCategoria : cat
+    );
+    localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
   };
 
   const deleteFilm = (id: number) => {
     setFilmesAdd((prevFilmesAdd) =>
       prevFilmesAdd.filter((filme) => filme.id !== id)
     );
+    const updatedCategoria = {
+      ...categoria,
+      movies: categoria.movies.filter((filme: MovieProps) => filme.id !== id),
+    };
+    updateCategoriaInLocalStorage(updatedCategoria);
   };
 
   const reorder = (
     list: MovieProps[],
     startIndex: number,
     endIndex: number
-  ) => {
+  ): MovieProps[] => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
     return result;
   };
 
+  useEffect(() => console.log("filmes add: ", filmesAdd), [filmesAdd]);
+
   return (
     <div className="w-full h-auto p-3 overflow-y-auto space-y-5 rounded-3xl animate-jump-in animate-delay-200 animate-once ">
       <div className="border border-slate-500 h-auto w-full flex relative rounded-md">
         <div
-          className="h-auto w-32 flex flex-wrap p-1 overflow-hidden justify-end"
+          className="h-auto w-32 flex flex-wrap p-1 overflow-hidden"
           style={{ backgroundColor: selectedColor }}
         >
-          <div className="w-full h-auto rounded-xl">
+          <div className=" h-auto rounded-xl absolute">
             <input
               type="color"
               className="w-4 h-4 rounded-xl cursor-crosshair bg-transparent  -top-3 -left-1 absolute"

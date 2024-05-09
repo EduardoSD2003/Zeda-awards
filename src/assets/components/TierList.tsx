@@ -4,21 +4,32 @@ import { CategoriaProps, Id, MovieProps } from "../../types";
 import TierListContainer from "./TierListContainer";
 import Filmes from "./Filmes";
 import { newtonsCradle } from "ldrs";
-import { toPng} from "html-to-image";
+import { toPng } from "html-to-image";
 
 newtonsCradle.register();
 
-
-
 function TierList() {
-  const [categorias, setCategorias] = useState<CategoriaProps[]>([]);
+  useEffect(() => {
+    const storedData = localStorage.getItem("categoria");
+    if (storedData !== null) {
+      setCategorias(JSON.parse(storedData));
+    }
+  }, []);
+
+  const [categorias, setCategorias] = useState<CategoriaProps[]>(() => {
+    const storedData = localStorage.getItem("categoria");
+    return storedData !== null ? JSON.parse(storedData) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("categoria", JSON.stringify(categorias));
+  }, [categorias]);
 
   const [listaFilmes, setListaFilmes] = useState<MovieProps[]>([]);
 
   const [searchText, setSearchText] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
-
 
   const getMovie = async () => {
     const response = await fetch(
@@ -54,17 +65,17 @@ function TierList() {
     if (ref.current === null) {
       return;
     }
-  
-    toPng(ref.current, { cacheBust: true,})
-    .then((dataUrl) => {
-      const link = document.createElement("a");
-      link.download = "zeda-tier-list.png";
-      link.href = dataUrl;
-      link.click();
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+
+    toPng(ref.current, { cacheBust: true })
+      .then((dataUrl) => {
+        const link = document.createElement("a");
+        link.download = "zeda-tier-list.png";
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, [ref]);
 
   return (
@@ -107,7 +118,12 @@ function TierList() {
           />
         </div>
 
-        <ImageDown className="cursor-pointer m-5 size-7 text-slate-100 hover:text-green-500" onClick={onButtonClick}>Salvar</ImageDown>
+        {categorias && categorias.length > 0 && (
+          <ImageDown
+            className="cursor-pointer m-5 size-7 text-slate-100 hover:text-green-500"
+            onClick={onButtonClick}
+          />
+        )}
 
         <div ref={ref}>
           {categorias.map((cat) => (
