@@ -121,7 +121,7 @@ function TierList() {
           />
         )}
 
-        <div ref={ref}>
+        <div ref={ref} className="bg-slate-600">
           {categorias.map((cat) => (
             <TierListContainer
               key={cat.id}

@@ -12,32 +12,12 @@ interface Props {
 
 function TierListContainer(props: Props) {
   const { categoria, deletarCategoria, updadeCategoria, movies } = props;
-  const [indexFinal, setIndexFinal] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(categoria.color || "");
   const [indexInicial, setIndexInicial] = useState(0);
-
   const [filmesAdd, setFilmesAdd] = useState<MovieProps[]>(
     categoria.movies || []
   );
-
-  
-
-  const handleOnDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleOnDragOverList = (index: number) => {
-    setIndexFinal(index);
-  };
-
-  const handleOnDragStart = (
-    e: React.DragEvent,
-    filmeId: number,
-    index: number
-  ) => {
-    e.dataTransfer.setData("filmeId", filmeId.toString());
-    setIndexInicial(index);
-  };
+  const [indexFinal, setIndexFinal] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(categoria.color || "");
 
   const handleColorChange = (event: any) => {
     const color = event.target.value;
@@ -45,7 +25,7 @@ function TierListContainer(props: Props) {
     const storedCategorias = JSON.parse(
       localStorage.getItem("categoria") || "[]"
     );
-    const updatedCategorias = storedCategorias.map((cat: CategoriaProps) =>
+    const updatedCategorias = storedCategorias.map((cat: any) =>
       cat.id === categoria.id ? { ...cat, color } : cat
     );
     localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
@@ -69,6 +49,29 @@ function TierListContainer(props: Props) {
     }
   };
 
+  const handleOnDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleOnDragStart = (
+    e: React.DragEvent,
+    filmeId: number,
+    index: number
+  ) => {
+    e.dataTransfer.setData("filmeId", filmeId.toString());
+    setIndexInicial(index);
+  };
+
+  const handleOnDragOverList = (index: number) => {
+    setIndexFinal(index);
+  };
+
+  
+  const handleOnDragEndList = () => {
+    const items = reorder(filmesAdd, indexInicial, indexFinal);
+    setFilmesAdd(items);
+  };
+
   const updateCategoriaInLocalStorage = (updatedCategoria: CategoriaProps) => {
     const storedCategorias = JSON.parse(localStorage.getItem("categoria") || "[]");
     const updatedCategorias = storedCategorias.map((cat: CategoriaProps) =>
@@ -76,17 +79,6 @@ function TierListContainer(props: Props) {
     );
     localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
   };
-
-  const handleOnDragEndList = () => {
-    const updatedFilmesAdd = reorder(filmesAdd, indexInicial, indexFinal);
-    setFilmesAdd(updatedFilmesAdd);
-    const updatedCategoria = {
-      ...categoria,
-      movies: updatedFilmesAdd,
-    };
-    updateCategoriaInLocalStorage(updatedCategoria);
-  };
-
 
   const deleteFilm = (id: number) => {
     setFilmesAdd((prevFilmesAdd) =>
@@ -103,7 +95,7 @@ function TierListContainer(props: Props) {
     list: MovieProps[],
     startIndex: number,
     endIndex: number
-  ): MovieProps[] => {
+  ) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
@@ -144,15 +136,15 @@ function TierListContainer(props: Props) {
         </div>
 
         <div
-          className="border-2 border-slate-400 h-auto w-11/12 items-center p-2 flex flex-wrap "
+          className="border-2 border-slate-400 h-auto w-11/12 pb-2 items-baseline space-y-2 flex flex-wrap"
           onDragOver={handleOnDragOver}
           onDrop={handleOnDrop}
         >
           {filmesAdd.map((filme: MovieProps, index) => (
-            <div key={filme.id} data-index={index} className="mb-3 ml-3">
+            <div key={filme.id} data-index={index} className="ml-2">
               <img
                 src={`https://image.tmdb.org/t/p/w500/${filme.poster_path}`}
-                className="size-28 cursor-grab"
+                className="size-28 cursor-grab border border-white"
                 draggable
                 onDoubleClick={() => deleteFilm(filme.id)}
                 onDragStart={(e) => handleOnDragStart(e, filme.id, index)}
