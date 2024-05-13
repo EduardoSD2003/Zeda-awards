@@ -3,7 +3,7 @@ export type Id = string | number;
 export type CategoriaProps = {
     id: Id;
     title: string
-    color?: string
+    color: string;
     movies?: any
 }
 

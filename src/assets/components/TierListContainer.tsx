@@ -1,12 +1,12 @@
 import { Paintbrush2, Trash2 } from "lucide-react";
 import { CategoriaProps, Id, MovieProps } from "../../types";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 
 interface Props {
   categoria: CategoriaProps;
   deletarCategoria: (id: Id) => void;
-  updadeCategoria: (id: Id, title: string) => void;
+  updadeCategoria: (id: Id, title: string, color: string) => void;
   movies: MovieProps[];
 }
 
@@ -17,19 +17,17 @@ function TierListContainer(props: Props) {
     categoria.movies || []
   );
   const [indexFinal, setIndexFinal] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(categoria.color || "");
+  const [selectedColor, setSelectedColor] = useState(categoria.color);
+
+
 
   const handleColorChange = (event: any) => {
     const color = event.target.value;
+    const title = categoria.title
     setSelectedColor(color);
-    const storedCategorias = JSON.parse(
-      localStorage.getItem("categoria") || "[]"
-    );
-    const updatedCategorias = storedCategorias.map((cat: any) =>
-      cat.id === categoria.id ? { ...cat, color } : cat
-    );
-    localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
+    updadeCategoria(categoria.id, title, color);  
   };
+
 
   const handleOnDrop = (e: React.DragEvent<HTMLDivElement>) => {
     const filmeId = Number(e.dataTransfer.getData("filmeId"));
@@ -66,7 +64,6 @@ function TierListContainer(props: Props) {
     setIndexFinal(index);
   };
 
-  
   const handleOnDragEndList = () => {
     const items = reorder(filmesAdd, indexInicial, indexFinal);
     setFilmesAdd(items);
@@ -79,6 +76,8 @@ function TierListContainer(props: Props) {
     );
     localStorage.setItem("categoria", JSON.stringify(updatedCategorias));
   };
+
+  
 
   const deleteFilm = (id: number) => {
     setFilmesAdd((prevFilmesAdd) =>
@@ -125,7 +124,7 @@ function TierListContainer(props: Props) {
           <div className="w-full h-full text-black/80 overflow-y-auto flex items-center min-h-24 p-2">
             <TextareaAutosize
               value={categoria.title}
-              onChange={(e) => updadeCategoria(categoria.id, e.target.value)}
+              onChange={(e) => updadeCategoria(categoria.id, e.target.value, selectedColor)}
               autoFocus
               spellCheck={false}
               placeholder="Adicione uma categoria"
@@ -160,7 +159,7 @@ function TierListContainer(props: Props) {
             onClick={() => {
               deletarCategoria(categoria.id);
             }}
-            className="cursor-pointer hover:text-red-900"
+            className="cursor-pointer hover:text-red-900 text-red-600"
           />
         </div>
       </div>

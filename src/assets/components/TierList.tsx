@@ -21,6 +21,7 @@ function TierList() {
     const storedData = localStorage.getItem("categoria");
     return storedData !== null ? JSON.parse(storedData) : [];
   });
+  
   useEffect(() => {
     localStorage.setItem("categoria", JSON.stringify(categorias));
   }, [categorias]);
@@ -58,6 +59,7 @@ function TierList() {
   };
 
   const ref = useRef<HTMLDivElement>(null);
+  
   const onButtonClick = useCallback(() => {
     if (ref.current === null) {
       return;
@@ -140,6 +142,7 @@ function TierList() {
     const categoriaToAdd: CategoriaProps = {
       id: generateId(),
       title: "",
+      color: "",
     };
     setCategorias([...categorias, categoriaToAdd]);
   }
@@ -149,10 +152,10 @@ function TierList() {
     setCategorias(categoriasFiltradas);
   }
 
-  function updadeCategoria(id: Id, title: string) {
+  function updadeCategoria(id: Id, title: string, color: string) {
     const novasCategorias = categorias.map((cat) => {
       if (cat.id !== id) return cat;
-      return { ...cat, title };
+      return { ...cat, title, color };
     });
 
     setCategorias(novasCategorias);
